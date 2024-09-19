@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 
+// Dynamically import the Map component to prevent SSR issues
 const Map = dynamic(() => import('../components/Map'), { ssr: false });
 
 const Home = () => {
@@ -21,11 +22,12 @@ const Home = () => {
     window.document.body.appendChild(googleMapsScript);
 
     googleMapsScript.addEventListener('load', () => {
+      // Initialize the Autocomplete for the origin and destination inputs
       if (originRef.current && destinationRef.current) {
         const originAutocomplete = new window.google.maps.places.Autocomplete(originRef.current);
         const destinationAutocomplete = new window.google.maps.places.Autocomplete(destinationRef.current);
 
-
+        // Listen for place selection on origin
         originAutocomplete.addListener('place_changed', () => {
           const place = originAutocomplete.getPlace();
           if (place.geometry?.location) {
