@@ -1,14 +1,13 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react';
-import Map from '../../components/Map'; // Import the Map component
-import { getMarkers } from '../actions/markers'; // Fetch markers from server actions
+import Map from '../../components/Map'; 
+import { getMarkers } from '../actions/markers';
 
 const MapWithListPage = () => {
   const [markers, setMarkers] = useState([]);
-  const mapRef = useRef(null); // Ref for the Map component
+  const mapRef = useRef(null);
 
-  // Fetch markers on page load
   useEffect(() => {
     const fetchMarkers = async () => {
       const fetchedMarkers = await getMarkers();
@@ -18,10 +17,10 @@ const MapWithListPage = () => {
     fetchMarkers();
   }, []);
 
-  // Focus on marker when clicked from the list
+  
   const handleMarkerClick = (id: string) => {
     if (mapRef.current) {
-      mapRef.current.focusMarker(id); // Call the focusMarker method on the Map component
+      mapRef.current.focusMarker(id);
     }
   };
 

@@ -1,7 +1,7 @@
 // /app/actions/markers.ts
 'use server';
- import prisma from '@/lib/prisma';// Import Prisma client for database access
-import { z } from 'zod'; // Zod for input validation
+ import prisma from '@/lib/prisma';
+import { z } from 'zod';
 
 // Zod schema for marker validation
 const markerSchema = z.object({
@@ -15,7 +15,7 @@ const markerSchema = z.object({
   curiosity: z.string().min(1, { message: 'Curiosity is required' }),
 });
 
-// Add a new marker
+
 export async function addMarker({
   lat,
   lng,
@@ -43,7 +43,7 @@ export async function addMarker({
   }
 }
 
-// Fetch all markers
+
 export async function getMarkers() {
   try {
     const markers = await prisma.marker.findMany();
@@ -53,7 +53,7 @@ export async function getMarkers() {
   }
 }
 
-// Edit a marker
+
 export async function editMarker({
   id,
   lat,
@@ -81,7 +81,7 @@ export async function editMarker({
   }
 }
 
-// Delete a marker
+
 export async function deleteMarker(id: string) {
   try {
     await prisma.marker.delete({

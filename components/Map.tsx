@@ -16,7 +16,6 @@ type MapProps = {
   onMarkerClick?: (id: string) => void;
 };
 
-// ForwardRef allows the parent to call focusMarker from outside the component
 const Map = forwardRef(({ onMarkerClick }: MapProps, ref) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [markersData, setMarkersData] = useState<MarkerData[]>([]);
@@ -25,7 +24,6 @@ const Map = forwardRef(({ onMarkerClick }: MapProps, ref) => {
 
   let openInfoWindow: google.maps.InfoWindow | null = null;
 
-  // Fetch markers from the database
   useEffect(() => {
     const fetchMarkers = async () => {
       try {
@@ -39,7 +37,7 @@ const Map = forwardRef(({ onMarkerClick }: MapProps, ref) => {
     fetchMarkers();
   }, []);
 
-  // Initialize Google Map and add markers
+  
   useEffect(() => {
     const googleMapsScript = document.createElement('script');
     googleMapsScript.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
@@ -49,7 +47,7 @@ const Map = forwardRef(({ onMarkerClick }: MapProps, ref) => {
       if (mapRef.current) {
         const map = new window.google.maps.Map(mapRef.current, {
           center: { lat: 0, lng: 0 },
-          zoom: 2, // Initial zoom level
+          zoom: 2, 
         });
         setMapInstance(map);
 
@@ -69,13 +67,11 @@ const Map = forwardRef(({ onMarkerClick }: MapProps, ref) => {
             `,
           });
 
-          // Add click listener for markers to open info windows
           marker.addListener('click', () => {
             if (openInfoWindow) openInfoWindow.close();
             infoWindow.open(map, marker);
             openInfoWindow = infoWindow;
 
-            // Center the map on the clicked marker and set a reasonable zoom level
             map.setCenter(marker.getPosition());
             map.setZoom(10); // Reasonable zoom level
 
@@ -100,7 +96,7 @@ const Map = forwardRef(({ onMarkerClick }: MapProps, ref) => {
     };
   }, [markersData, onMarkerClick]);
 
-  // Expose the `focusMarker` method to parent components
+
   useImperativeHandle(ref, () => ({
     focusMarker: (id: string) => {
       const markerToFocus = markerInstances.current.find((instance) => {
@@ -110,9 +106,9 @@ const Map = forwardRef(({ onMarkerClick }: MapProps, ref) => {
       });
 
       if (markerToFocus && mapInstance) {
-        // Center map on the marker and open its info window
+      
         mapInstance.setCenter(markerToFocus.marker.getPosition());
-        mapInstance.setZoom(5); // Set zoom level to 10, not too close
+        mapInstance.setZoom(5); 
 
         if (openInfoWindow) openInfoWindow.close();
         markerToFocus.infoWindow.open(mapInstance, markerToFocus.marker);

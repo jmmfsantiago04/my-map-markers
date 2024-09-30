@@ -1,10 +1,10 @@
 "use client"
 import dynamic from 'next/dynamic';
 import AddMarkerForm from '@/components/AddMarkerForm';
-import { getMarkers, deleteMarker, editMarker } from '../actions/markers'; // Server actions
+import { getMarkers, deleteMarker, editMarker } from '../actions/markers';
 import { useEffect, useState } from 'react';
 
-// Dynamically load the Map component to avoid SSR issues
+
 const MapWithNoSSR = dynamic(() => import('@/components/Map'), { ssr: false });
 
 const AdminPage = () => {
@@ -12,7 +12,7 @@ const AdminPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editMarkerData, setEditMarkerData] = useState({ id: '', lat: '', lng: '', title: '', curiosity: '' });
 
-  // Fetch markers on page load
+
   useEffect(() => {
     const fetchMarkers = async () => {
       const fetchedMarkers = await getMarkers();
@@ -22,7 +22,7 @@ const AdminPage = () => {
     fetchMarkers();
   }, []);
 
-  // Handle delete marker
+
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this marker?')) {
       await deleteMarker(id);
@@ -30,13 +30,13 @@ const AdminPage = () => {
     }
   };
 
-  // Handle edit marker
+
   const handleEdit = (marker) => {
     setIsEditing(true);
     setEditMarkerData(marker);
   };
 
-  // Handle save after editing
+
   const handleSaveEdit = async () => {
     await editMarker({
       id: editMarkerData.id,
@@ -60,7 +60,7 @@ const AdminPage = () => {
         <AddMarkerForm />
       </div>
 
-      {/* List of Markers */}
+
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">Existing Markers</h2>
         {markers.length > 0 ? (
@@ -97,7 +97,6 @@ const AdminPage = () => {
         )}
       </div>
 
-      {/* Edit Marker Form */}
       {isEditing && (
         <div className="bg-white shadow-lg rounded-lg p-6">
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">Edit Marker</h2>
@@ -143,7 +142,6 @@ const AdminPage = () => {
         </div>
       )}
 
-      {/* Display the map */}
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">Marker Locations</h2>
         <MapWithNoSSR />

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTransition } from 'react';
-import { addMarker } from '@/app/actions/markers';// Import the server action for adding markers
+import { addMarker } from '@/app/actions/markers';
 
 const AddMarkerForm = () => {
   const [lat, setLat] = useState('');
