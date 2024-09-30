@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -14,7 +10,10 @@ datasource db {
 }
 
 model Marker {
-  id        Int      @id @default(autoincrement())
-  latitude  Float
-  longitude Float
+  id        Int     @id @default(autoincrement())
+  lat       Float
+  lng       Float
+  title     String
+  curiosity String
+  createdAt DateTime @default(now())
 }
