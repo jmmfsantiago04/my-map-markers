@@ -1,8 +1,7 @@
-'use client';
+'use client'; // This marks it as a client component
 
-import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
-import { getMarkers } from '@/app/actions/markers';
 
 type MarkerData = {
   id: string;
@@ -13,45 +12,34 @@ type MarkerData = {
 };
 
 type MapProps = {
+  markers: MarkerData[];
   onMarkerClick?: (id: string) => void;
 };
 
-const Map = forwardRef(({ onMarkerClick }: MapProps, ref) => {
-  const mapRef = useRef<HTMLDivElement | null>(null);
-  const [markersData, setMarkersData] = useState<MarkerData[]>([]);
-  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
+const Map = forwardRef(({ markers, onMarkerClick }: MapProps, ref) => {
+  const mapContainerRef = useRef<HTMLDivElement | null>(null); // Ref for the map container div
+  const mapInstanceRef = useRef<google.maps.Map | null>(null); // Ref for the Google Maps instance
   const markerInstances = useRef<{ marker: google.maps.Marker; infoWindow: google.maps.InfoWindow }[]>([]);
 
   let openInfoWindow: google.maps.InfoWindow | null = null;
 
-  useEffect(() => {
-    const fetchMarkers = async () => {
-      try {
-        const markers = await getMarkers();
-        setMarkersData(markers);
-      } catch (error) {
-        console.error('Error fetching markers:', error);
-      }
-    };
-
-    fetchMarkers();
-  }, []);
-
-  
   useEffect(() => {
     const googleMapsScript = document.createElement('script');
     googleMapsScript.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
     window.document.body.appendChild(googleMapsScript);
 
     googleMapsScript.addEventListener('load', () => {
-      if (mapRef.current) {
-        const map = new window.google.maps.Map(mapRef.current, {
+      if (mapContainerRef.current) {
+        const map = new window.google.maps.Map(mapContainerRef.current, {
           center: { lat: 0, lng: 0 },
-          zoom: 2, 
+          zoom: 2,
         });
-        setMapInstance(map);
 
-        const markers = markersData.map((markerData) => {
+        // Save the map instance to mapInstanceRef
+        mapInstanceRef.current = map;
+
+        // Create markers
+        const markersInstances = markers.map((markerData) => {
           const marker = new window.google.maps.Marker({
             position: { lat: markerData.lat, lng: markerData.lng },
             map,
@@ -68,56 +56,51 @@ const Map = forwardRef(({ onMarkerClick }: MapProps, ref) => {
           });
 
           marker.addListener('click', () => {
-            if (openInfoWindow) openInfoWindow.close();
             infoWindow.open(map, marker);
-            openInfoWindow = infoWindow;
-
-            map.setCenter(marker.getPosition());
-            map.setZoom(10); // Reasonable zoom level
-
             if (onMarkerClick) {
               onMarkerClick(markerData.id);
             }
           });
 
           markerInstances.current.push({ marker, infoWindow });
-
           return marker;
         });
 
-        new MarkerClusterer({ markers, map });
+        // Apply MarkerClusterer
+        new MarkerClusterer({ markers: markersInstances, map });
       }
     });
 
     return () => {
-      if (googleMapsScript) {
-        googleMapsScript.remove();
-      }
+      googleMapsScript.remove();
     };
-  }, [markersData, onMarkerClick]);
+  }, [markers, onMarkerClick]);
 
-
+  // Use `useImperativeHandle` to expose the `focusMarker` method to the parent component
   useImperativeHandle(ref, () => ({
     focusMarker: (id: string) => {
       const markerToFocus = markerInstances.current.find((instance) => {
-        const position = instance.marker.getPosition();
-        return position?.lat() === markersData.find((m) => m.id === id)?.lat &&
-               position?.lng() === markersData.find((m) => m.id === id)?.lng;
+        return instance.marker.getTitle() === markers.find((m) => m.id === id)?.title;
       });
 
-      if (markerToFocus && mapInstance) {
-      
-        mapInstance.setCenter(markerToFocus.marker.getPosition());
-        mapInstance.setZoom(5); 
+      if (markerToFocus && mapInstanceRef.current) {
+        const { marker, infoWindow } = markerToFocus;
+        const position = marker.getPosition();
 
-        if (openInfoWindow) openInfoWindow.close();
-        markerToFocus.infoWindow.open(mapInstance, markerToFocus.marker);
-        openInfoWindow = markerToFocus.infoWindow;
+        if (position) {
+          // Use the Google Maps instance to set the center and zoom
+          mapInstanceRef.current.setCenter(position); // Focus on the marker position
+          mapInstanceRef.current.setZoom(10); // Zoom in
+        }
+
+        if (openInfoWindow) openInfoWindow.close(); // Close any open info windows
+        infoWindow.open(mapInstanceRef.current, marker); // Open the info window for the selected marker
+        openInfoWindow = infoWindow; // Set the new info window as open
       }
     },
   }));
 
-  return <div ref={mapRef} className="h-96 w-full rounded-lg shadow-lg border" />;
+  return <div ref={mapContainerRef} className="h-96 w-full rounded-lg shadow-lg border" />;
 });
 
 Map.displayName = 'Map';

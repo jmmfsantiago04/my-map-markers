@@ -38,7 +38,6 @@ export default async function AdminPage() {
         )}
       </div>
 
-      {/* Display the map */}
       <div className="lg:w-2/3">
         <Map />
       </div>

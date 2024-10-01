@@ -19,6 +19,7 @@ export default function Home() {
         <Link href="/mapWithList"className="inline-block bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition">
           
             Go to Map with List
+
         </Link>
       </div>
     </main>
