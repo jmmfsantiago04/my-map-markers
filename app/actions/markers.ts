@@ -1,9 +1,9 @@
-// /app/actions/markers.ts
+
 'use server';
  import prisma from '@/lib/prisma';
 import { z } from 'zod';
 
-// Zod schema for marker validation
+
 const markerSchema = z.object({
   lat: z.number().refine((val) => val >= -90 && val <= 90, {
     message: 'Latitude must be between -90 and 90',
