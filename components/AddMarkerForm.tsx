@@ -1,7 +1,7 @@
-'use client'; // This is a Client Component
+'use client';
 
 import { useState } from 'react';
-import { addMarker } from '@/app/actions/markers'; // Action to add a marker
+import { addMarker } from '@/app/actions/markers'; 
 import { useTransition } from 'react';
 
 export default function AddMarkerForm() {

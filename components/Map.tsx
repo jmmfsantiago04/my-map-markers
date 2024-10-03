@@ -31,7 +31,7 @@ const Map = forwardRef(({ markers, onMarkerClick }: MapProps, ref) => {
     googleMapsScript.addEventListener('load', () => {
       if (mapContainerRef.current) {
         const map = new window.google.maps.Map(mapContainerRef.current, {
-          center: { lat: 0, lng: 0 },
+          center: { lat: 0, lng: 0 }, // Initial center
           zoom: 2,
         });
 
@@ -66,7 +66,6 @@ const Map = forwardRef(({ markers, onMarkerClick }: MapProps, ref) => {
           return marker;
         });
 
-        // Apply MarkerClusterer
         new MarkerClusterer({ markers: markersInstances, map });
       }
     });
@@ -79,23 +78,28 @@ const Map = forwardRef(({ markers, onMarkerClick }: MapProps, ref) => {
   // Use `useImperativeHandle` to expose the `focusMarker` method to the parent component
   useImperativeHandle(ref, () => ({
     focusMarker: (id: string) => {
-      const markerToFocus = markerInstances.current.find((instance) => {
-        return instance.marker.getTitle() === markers.find((m) => m.id === id)?.title;
-      });
+      const markerData = markers.find((m) => m.id === id); // Find marker data by id
 
-      if (markerToFocus && mapInstanceRef.current) {
-        const { marker, infoWindow } = markerToFocus;
-        const position = marker.getPosition();
+      if (markerData && mapInstanceRef.current) {
+        const { lat, lng } = markerData;
+        const position = { lat, lng };
 
-        if (position) {
-          // Use the Google Maps instance to set the center and zoom
-          mapInstanceRef.current.setCenter(position); // Focus on the marker position
-          mapInstanceRef.current.setZoom(10); // Zoom in
+        // Set the map center to the marker's lat/lng and zoom in
+        mapInstanceRef.current.setCenter(position); // Center the map on the marker
+        mapInstanceRef.current.setZoom(10); // Zoom in
+
+        // Find the corresponding marker and info window
+        const markerToFocus = markerInstances.current.find(
+          (instance) => instance.marker.getTitle() === markerData.title
+        );
+
+        if (markerToFocus) {
+          const { marker, infoWindow } = markerToFocus;
+
+          if (openInfoWindow) openInfoWindow.close(); // Close any open info windows
+          infoWindow.open(mapInstanceRef.current, marker); // Open the info window for the selected marker
+          openInfoWindow = infoWindow; // Set the new info window as open
         }
-
-        if (openInfoWindow) openInfoWindow.close(); // Close any open info windows
-        infoWindow.open(mapInstanceRef.current, marker); // Open the info window for the selected marker
-        openInfoWindow = infoWindow; // Set the new info window as open
       }
     },
   }));
